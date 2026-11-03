@@ -1,0 +1,24 @@
+flowchart LR
+  O1[("op.cursadas<br/>base académica")] --> C1["lake/cruda/base_academica<br/>foto CSV + huella"]
+  C1 --> K1["cursada<br/>zona curada"]
+  O2["notas_AAAA-Nc.csv<br/>contrato v1 / v2"] --> C2["lake/cruda/notas<br/>tal cual llegó"]
+  O3["actas_docentes.xlsx"] --> C3["lake/cruda/actas_docentes"]
+  C2 --> K2["nota · 0 a 10<br/>zona curada"]
+  C3 -->|"prevalece"| K2
+  O4[("op.alumnos +<br/>op.cambios_plan")] --> K3["persona · legajo<br/>dim_alumno SCD 2"]
+  K1 --> H["hecho_cursada<br/>zona consumo<br/>por cuatrimestre + huella"]
+  K2 --> H
+  K3 --> H
+  H --> I(["tasa_de_aprobacion<br/>por materia y cuatrimestre"])
+  Q["Reglas R4 · R5 · R10"] -.-> H
+
+  classDef origen fill:#eef2f7,stroke:#5b6b80
+  classDef cruda fill:#f3f3f3,stroke:#888
+  classDef curada fill:#e8f4ea,stroke:#3c7a4a
+  classDef consumo fill:#efe9f7,stroke:#6a4c93
+  classDef ctl fill:#fff4e0,stroke:#b07a1a
+  class O1,O2,O3,O4 origen
+  class C1,C2,C3 cruda
+  class K1,K2,K3 curada
+  class H,I consumo
+  class Q ctl
