@@ -1,0 +1,39 @@
+flowchart TB
+  subgraph G1["Grupo de procesos: archivos externos (uno por origen)"]
+    L["ListFile<br/>carpeta de entrada<br/>cada 10 min"] -->|success| F["FetchFile"]
+    F -->|success| H["CryptographicHashContent<br/>SHA-256 = huella"]
+    H -->|success| D["DetectDuplicate<br/>¿huella ya ingerida?"]
+    D -->|non-duplicate| R["PutFile<br/>zona cruda<br/>/origen/llegada=fecha/"]
+    D -->|duplicate| X1["LogMessage<br/>omitido"]
+    R -->|success| XL["ConvertExcelToCSV<br/>solo XLSX: una salida por hoja"]
+    XL -->|success| V["ValidateRecord<br/>contrato del origen<br/>Schema Registry"]
+    V -->|valid| U["UpdateRecord<br/>normalizar: escala, coma decimal,<br/>legajo, DNI, materia"]
+    U -->|success| LK["LookupRecord<br/>legajo / DNI → persona<br/>materia → id"]
+    LK -->|matched| P["PutDatabaseRecord<br/>zona curada<br/>upsert por clave natural"]
+  end
+
+  subgraph G2["Base académica"]
+    Q["QueryDatabaseTableRecord<br/>alumnos · materias · cursadas<br/>cambios_plan"] -->|success| R
+  end
+
+  V -->|invalid| CQ["UpdateAttribute<br/>motivo = regla que no pasó"]
+  LK -->|unmatched| CQ
+  XL -->|failure| CQ
+  P -->|failure| CQ
+  CQ --> CP[["PutDatabaseRecord<br/>cuarentena"]]
+
+  subgraph M["Monitoreo"]
+    MA["MonitorActivity<br/>sin archivos en 24 h<br/>durante el cierre de actas"]
+    BR["Bulletins + Reporting Task<br/>errores de procesadores"]
+    AL["PutEmail / Slack<br/>a la responsable de datos"]
+    MA --> AL
+    BR --> AL
+  end
+  CP -.->|"% de cuarentena > umbral"| AL
+
+  classDef proc fill:#eef2f7,stroke:#5b6b80
+  classDef err fill:#fde8e8,stroke:#b03a3a
+  classDef mon fill:#fff4e0,stroke:#b07a1a
+  class L,F,H,D,R,XL,V,U,LK,P,Q proc
+  class CQ,CP,X1 err
+  class MA,BR,AL mon
