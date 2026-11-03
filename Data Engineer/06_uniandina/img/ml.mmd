@@ -1,0 +1,32 @@
+flowchart TB
+  CU[("Zona curada<br/>cursadas · notas · préstamos<br/>becas · dim_alumno SCD 2")]
+  FV["construir_variables(corte)<br/>solo hechos ANTERIORES al corte<br/>sin «abandonó» ni datos personales"]
+  VA[("Zona variables<br/>variables_abandono por corte<br/>+ foto CSV con huella")]
+  ET[("etiqueta_abandono<br/>se conoce al cierre del<br/>cuatrimestre siguiente")]
+  EN["Entrenamiento<br/>validación cruzada · semilla fija<br/>prueba de fuga"]
+  RG[("Registro de modelos<br/>v0 regla · v1 logística<br/>estado · métricas · huella")]
+  PR{"Criterios de<br/>promoción<br/>aprueba Tutorías"}
+  SC["Puntuación por lotes<br/>al inicio de cada cuatrimestre<br/>tarea del DAG"]
+  CO[("Zona consumo<br/>riesgo_abandono<br/>sin datos personales")]
+  TU["Tutorías<br/>los 200 primeros<br/>nombre y correo por su rol"]
+  MO["Monitoreo<br/>PSI por variable en cada corte<br/>recall@200 real al cierre"]
+  MA{{"Marcha atrás<br/>vuelve la versión de respaldo"}}
+
+  CU --> FV --> VA --> EN
+  ET --> EN
+  EN --> RG --> PR
+  PR -- "cumple todo" --> SC
+  PR -- "no cumple" --> RG
+  VA --> SC --> CO --> TU
+  VA --> MO
+  ET -.->|"al cierre"| MO
+  MO -- "alerta" --> MA --> RG
+
+  classDef dato fill:#e8f4ea,stroke:#3c7a4a
+  classDef proc fill:#eef2f7,stroke:#5b6b80
+  classDef ctl fill:#fff4e0,stroke:#b07a1a
+  classDef usr fill:#efe9f7,stroke:#6a4c93
+  class CU,VA,ET,RG,CO dato
+  class FV,EN,SC proc
+  class PR,MO,MA ctl
+  class TU usr
