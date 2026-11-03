@@ -1,0 +1,47 @@
+flowchart LR
+  A1[("Base académica<br/>alumnos · materias<br/>cursadas · cambios_plan")]
+  A2["Biblioteca<br/>eventos JSONL"]
+  E1["Notas por cuatrimestre<br/>CSV · el esquema cambia"]
+  E2["Actas docentes<br/>XLSX · 3 hojas"]
+  E3["Becas · CSV"]
+  E4["Encuesta · XLSX<br/>anónima"]
+
+  Z1["<b>Zona cruda</b><br/>archivo tal cual llegó<br/>inmutable · por fecha de llegada"]
+  V{"Contrato<br/>columnas · tipos<br/>escala · claves"}
+  Q[["<b>Cuarentena</b><br/>fila o archivo + motivo"]]
+  Z2["<b>Zona curada</b><br/>tablas limpias · persona única<br/>PII separada"]
+  Z3["<b>Zona variables</b><br/>features con fecha de corte"]
+  Z4["<b>Zona consumo</b><br/>estrella: hecho_cursada<br/>dim alumno SCD2 · materia · tiempo"]
+
+  C1["Tablero académico<br/>bedelía · directores"]
+  C2["Modelo de riesgo<br/>de abandono"]
+  C3["Tutores<br/>alumnos en riesgo"]
+
+  O["Orquestador · DAG<br/>diario en cierre de actas<br/>semanal el resto del año"]
+  G["Calidad · catálogo · linaje"]
+
+  A1 --> Z1
+  A2 --> Z1
+  E1 --> Z1
+  E2 --> Z1
+  E3 --> Z1
+  E4 --> Z1
+  Z1 --> V
+  V -- pasa --> Z2
+  V -- no pasa --> Q
+  Z2 --> Z4
+  Z2 --> Z3
+  Z4 --> C1
+  Z3 --> C2
+  C2 --> C3
+  O -.-> V
+  G -.-> Z2
+
+  classDef fuente fill:#eef2f7,stroke:#5b6b80
+  classDef zona fill:#e8f4ea,stroke:#3c7a4a
+  classDef control fill:#fff4e0,stroke:#b07a1a
+  classDef consumo fill:#efe9f7,stroke:#6a4c93
+  class A1,A2,E1,E2,E3,E4 fuente
+  class Z1,Z2,Z3,Z4 zona
+  class V,Q,O,G control
+  class C1,C2,C3 consumo

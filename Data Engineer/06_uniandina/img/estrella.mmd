@@ -1,0 +1,51 @@
+erDiagram
+  hecho_cursada }o--|| dim_alumno : "sk_alumno (versión vigente en el cuatrimestre)"
+  hecho_cursada }o--|| dim_materia : "sk_materia"
+  hecho_cursada }o--|| dim_tiempo : "sk_tiempo"
+  dim_alumno }o--|| persona_pii : "id_persona (acceso restringido)"
+
+  hecho_cursada {
+    int sk_cursada PK
+    text id_cursada "dimensión degenerada"
+    int sk_alumno FK
+    int sk_materia FK
+    int sk_tiempo FK
+    text estado "aprobada · desaprobada · abandonó"
+    real nota "0 a 10, normalizada"
+    int aprobada "0 o 1"
+    int ausente "0 o 1"
+    text fuente_nota "acta · csv · sin nota"
+    int id_lote FK "linaje"
+  }
+  dim_alumno {
+    int sk_alumno PK
+    text id_persona "clave natural: persona única"
+    text id_alumno_vigente
+    text legajo_vigente
+    text carrera
+    text plan_estudio "atributo con historia"
+    text valido_desde
+    text valido_hasta "9999-12-31 si está vigente"
+    int es_vigente
+  }
+  dim_materia {
+    int sk_materia PK
+    text id_materia
+    text nombre
+    text carrera
+  }
+  dim_tiempo {
+    int sk_tiempo PK
+    text cuatrimestre "2024-2c"
+    int anio
+    int numero
+    text fecha_inicio
+    text fecha_fin
+  }
+  persona_pii {
+    text id_persona PK
+    text dni
+    text nombre
+    text fecha_nacimiento
+    text email
+  }
