@@ -1,0 +1,4 @@
+# Lo que genera el notebook al correrlo (se recrea solo)
+fuentes/
+lake/
+dwh.db

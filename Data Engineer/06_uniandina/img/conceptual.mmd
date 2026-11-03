@@ -1,0 +1,14 @@
+erDiagram
+  direction LR
+  PERSONA ||--|{ LEGAJO : "tiene uno o más"
+  LEGAJO }o--|| CARRERA : "pertenece a"
+  LEGAJO ||--|{ PERIODO_EN_PLAN : "pasa por"
+  LEGAJO ||--o{ CURSADA : "se inscribe en"
+  MATERIA ||--o{ CURSADA : "se dicta en"
+  CUATRIMESTRE ||--o{ CURSADA : "ocurre en"
+  CURSADA ||--o| NOTA_DE_ACTA : "se califica en"
+  DOCENTE ||--o{ NOTA_DE_ACTA : "firma"
+  LEGAJO ||--o{ PRESTAMO : "pide"
+  PERSONA ||--o{ BECA : "recibe"
+  MATERIA ||--o{ RESPUESTA_ENCUESTA : "es evaluada en"
+  CUATRIMESTRE ||--o{ RESPUESTA_ENCUESTA : "ocurre en"
