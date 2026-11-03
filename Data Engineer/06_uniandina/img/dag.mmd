@@ -1,0 +1,29 @@
+flowchart LR
+  G{"¿Toca hoy?<br/>diario en cierre de actas<br/>lunes el resto del año"} --> EB["extraer_base<br/>foto de la base académica"]
+  EB --> DA["dim_alumno<br/>SCD 2 al día"]
+  EB --> MA["materias"]
+  DA --> CU["cursadas"]
+  MA --> CU
+  DA --> BI["biblioteca"]
+  DA --> BE["becas"]
+  MA --> EN["encuesta"]
+  CU --> N1["notas_2024-2c"]
+  CU --> N2["notas_2025-1c"]
+  CU --> NX["notas_… <br/>una tarea por archivo"]
+  N1 --> AC["actas<br/>prevalece sobre los CSV"]
+  N2 --> AC
+  NX --> AC
+  CU --> PC["publicar_consumo<br/>por cuatrimestre<br/>regla de tardíos"]
+  AC --> PC
+  PC --> AV["aviso<br/>a la responsable"]
+  BI --> AV
+  BE --> AV
+  EN --> AV
+  X(["on_failure_callback<br/>aviso de falla"]) -.- AV
+
+  classDef ing fill:#eef2f7,stroke:#5b6b80
+  classDef pub fill:#e8f4ea,stroke:#3c7a4a
+  classDef ctl fill:#fff4e0,stroke:#b07a1a
+  class EB,DA,MA,CU,BI,BE,EN,N1,N2,NX,AC ing
+  class PC pub
+  class G,AV,X ctl
