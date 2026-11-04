@@ -72,35 +72,35 @@ Asumimos 17 cosas que el caso no declara. Cada una está escrita en el notebook 
 
 ## La defensa
 
-Son 8 minutos repartidos entre los cuatro roles de la consigna. Cada integrante habla de lo que le toca defender en las preguntas. **Mati abre y cierra como Revisión**, porque conoce el trabajo entero y puede tomar cualquier pregunta que quede suelta. Si el equipo es de tres, Revisión también toma la parte de Gobierno.
+Son 8 minutos repartidos entre cuatro personas, uno por parte de la presentación. **Mati** abre con el problema y presenta el modelo; **Gabi** cuenta la arquitectura y cierra con los futuros pasos; **JJ** explica el diseño (modelo de datos, ingestión y orquestación) y las fallas; **Ale** presenta la calidad.
 
 | Tiempo | Quién | Parte | Diapositiva |
 | --- | --- | --- | --- |
-| 0:00–1:00 | Mati · Revisión | Problema y decisión | 1 y 2 |
-| 1:00–2:30 | Integrante · Arquitectura | Arquitectura, modelo y carga con historia | 3 y 4 |
-| 2:30–4:00 | Integrante · Operación | Ingestión, contratos y DAG | 5 |
-| 4:00–5:00 | Integrante · Gobierno | Calidad, roles y seguridad | 6 |
-| 5:00–6:00 | Mati · Revisión | El modelo y la trampa de la fuga | 7 |
-| 6:00–7:00 | Integrante · Operación | Fallas y recuperación | 8 |
-| 7:00–8:00 | Mati · Revisión | Lo que queda abierto | 9 |
+| 0:00–1:00 | Mati | El problema | 1 y 2 |
+| 1:00–2:00 | Gabi | Arquitectura | 3 |
+| 2:00–3:30 | JJ | Diseño | 4 y 5 |
+| 3:30–4:45 | Ale | Calidad | 6 |
+| 4:45–5:45 | Mati | Modelo | 7 |
+| 5:45–6:45 | JJ | Fallas | 8 |
+| 6:45–7:45 | Gabi | Futuros pasos | 9 |
 
 ### Qué dice cada uno
 
 Es un guion para leer en voz alta y después decirlo con palabras propias. Cada bloque entra en su tiempo a ritmo normal.
 
-**0:00–1:00 · Mati · Problema y decisión.** «UniAndina tiene 2.000 alumnos y quiere detectar a tiempo a los que van a abandonar. Lo formulamos como una decisión: a qué 200 alumnos llama Tutorías al empezar el cuatrimestre. Para eso los datos tienen que ser confiables, y no lo eran. Medimos 27 problemas en las siete fuentes. Los tres que más pesan: 60 personas con dos legajos, notas que cambian de columnas y de escala entre cuatrimestres, y datos personales de estudiantes.»
+**0:00–1:00 · Mati · El problema.** «UniAndina tiene 2.000 alumnos y quiere detectar a tiempo a los que van a abandonar. Lo formulamos como una decisión: a qué 200 alumnos llama Tutorías al empezar el cuatrimestre. Para eso los datos tienen que ser confiables, y no lo eran. Medimos 27 problemas en las siete fuentes. Los tres que más pesan: 60 personas con dos legajos, notas que cambian de columnas y de escala entre cuatrimestres, y datos personales de estudiantes.»
 
-**1:00–2:30 · Arquitectura.** «Elegimos un lakehouse liviano. Todo lo que llega se guarda primero tal cual, sin tocar, y después se limpia en tablas. Descartamos el warehouse clásico: cuando un archivo cambia de formato, el warehouse pierde el original y no hay reproceso. Descartamos Spark: son 2,5 MB. En el modelo, la persona es el DNI, no el legajo: si no, 60 personas cuentan doble. La dimensión alumno guarda la historia del plan, porque la base pisa el plan viejo. La carga es incremental y por conjuntos. Medimos tres versiones y la optimizada con índice es la más rápida. También aprendimos algo: la primera versión por conjuntos fue más lenta que fila por fila, y solo lo vimos porque medimos.»
+**1:00–2:00 · Gabi · Arquitectura.** «Elegimos un lakehouse liviano. Todo lo que llega se guarda primero tal cual, sin tocar, en la zona cruda, y después se limpia en tablas: curada, variables y consumo. Descartamos el warehouse clásico: cuando un archivo cambia de formato, el warehouse pierde el original y no hay reproceso. Descartamos Spark: son 2,5 MB, no justifican un clúster.»
 
-**2:30–4:00 · Operación.** «Cada origen tiene un contrato. Las notas tienen dos versiones declaradas, cada una con su escala, porque adivinar la escala mirando los datos falla en silencio. La cuarentena tiene dos niveles: si se rompe la forma, va el archivo entero; si falla un dato, solo esa fila. Así, 26 notas malas no frenan 7.930 buenas. Todos los lotes cierran el balance: cada fila leída está cargada o en cuarentena. El DAG corre a diario en cierre de actas y los lunes el resto del año: 158 corridas en 2025. Solo reintenta las fallas transitorias.»
+**2:00–3:30 · JJ · Diseño.** «En el modelo, la persona es el DNI, no el legajo: si no, 60 personas cuentan doble. La dimensión alumno guarda una fila por cada plan de carrera. Si una persona cambia de plan, no pisamos su fila: la cerramos y abrimos otra, y cada cursada usa el plan que la persona tenía al empezar el cuatrimestre. Para llevar los datos a la plataforma usamos dos herramientas. NiFi carga la ingesta a la zona cruda: trae cada archivo tal cual llegó y, con su huella, no ingiere dos veces lo mismo. Airflow orquesta las demás capas: curada, variables y consumo, a diario en cierre de actas y los lunes el resto del año, y solo reintenta las fallas transitorias. La cuarentena tiene dos niveles: si se rompe la forma, va el archivo entero; si falla un dato, solo esa fila. Así 26 notas malas no frenan 7.930 buenas.»
 
-**4:00–5:00 · Gobierno.** «Cada dato tiene un dueño, que es un área de la universidad, y un responsable que decide cuando falla un control. Definimos 10 reglas de calidad, medidas en el destino y también en el origen. Son: R1, una sola versión vigente por persona; R2, personas con dos legajos; R3, cursadas de alumnos que no existen; R4, estado de la cursada que no contradice la nota; R5, cursadas terminadas con nota o ausente; R6, acta y CSV que coinciden en las notas; R7, becas cuyo DNI es de un alumno; R8, respuestas de la encuesta válidas; R9, actas cargadas en menos de 24 horas; y R10, lotes cuyo balance cierra. Cumplen 6, y las 4 que fallan, R2, R3, R4 y R7, son problemas del origen que ahora tienen dueño. El más fuerte: 42 alumnos figuran aprobados en la base y ausentes en el acta. En seguridad, clasificamos las 133 columnas, los datos personales viven aparte y cada rol ve según su nivel. Tutorías solo ve nombre y correo de sus 200, sin el puntaje. Cada acceso queda auditado.»
+**3:30–4:45 · Ale · Calidad.** «Cada dato tiene un dueño, que es un área de la universidad, y un responsable que decide cuando falla un control. Definimos 10 reglas de calidad, medidas en el destino y también en el origen. Son: R1, una sola versión vigente por persona; R2, personas con dos legajos; R3, cursadas de alumnos que no existen; R4, estado de la cursada que no contradice la nota; R5, cursadas terminadas con nota o ausente; R6, acta y CSV que coinciden en las notas; R7, becas cuyo DNI es de un alumno; R8, respuestas de la encuesta válidas; R9, actas cargadas en menos de 24 horas; y R10, lotes cuyo balance cierra. Cumplen 6. Las 4 que no se cumplen, R2, R3, R4 y R7, son problemas del origen que ahora tienen dueño. El más fuerte es R4: 42 alumnos figuran aprobados en la base y ausentes en el acta. Además, los datos personales viven aparte, cada rol ve según su nivel y cada acceso queda auditado.»
 
-**5:00–6:00 · Mati · El modelo.** «El caso tenía una trampa. El estado «abandonó» de una materia aparece solo en quienes abandonan. Si el modelo lo usa, da 0,95 de AUC, pero detecta a gente que ya se fue. Lo sacamos, y el modelo honesto da 0,70. Antes de cualquier modelo, Tutorías ya ordenaba con una regla simple. Probamos dos candidatos contra esa regla. La regresión logística no le ganaba y se rechazó. El de árboles encuentra un 23 % más de abandonos y le gana en las cinco repeticiones, así que se promovió.»
+**4:45–5:45 · Mati · Modelo.** «El caso tenía una trampa. El estado «abandonó» de una materia aparece solo en quienes abandonan. Si el modelo lo usa, da 0,95 de AUC, pero detecta a gente que ya se fue. Lo sacamos, y el modelo honesto da 0,70. Lo medimos con el recall de la lista de 200: si llamáramos a 200 alumnos al azar, esperaríamos encontrar el 10 % de los abandonos. La regresión logística apenas mejoraba eso y se rechazó. El de árboles encuentra el 21 %, más del doble que el azar, y le gana en las cinco repeticiones, así que se promovió.»
 
-**6:00–7:00 · Operación · Fallas y recuperación.** «Probamos tres fallas. Llegó un archivo de notas con columnas nuevas: fue entero a cuarentena y el tablero siguió con lo último bueno. Llegó una rectificación de un acta de un cuatrimestre cerrado: entró en la zona curada, pero el tablero no cambió hasta que la responsable reabrió el cuatrimestre. Y una que no planeamos: el monitoreo detectó que la biblioteca no informó julio. El modelo volvió solo a la regla de respaldo.»
+**5:45–6:45 · JJ · Fallas.** «Probamos tres fallas. Llegó un archivo de notas con columnas nuevas: fue entero a cuarentena y el tablero siguió con lo último bueno. Llegó una rectificación de un acta de un cuatrimestre cerrado: entró en la zona curada, pero el tablero no cambió hasta que la responsable reabrió el cuatrimestre. Y una que no planeamos: el monitoreo detectó que la biblioteca no informó julio. El modelo volvió solo a la regla de respaldo.»
 
-**7:00–8:00 · Mati · Lo que queda abierto.** «El modelo es modesto: encuentra el 21 % de los abandonos. Sirve para ordenar llamados, no para afirmar que alguien va a abandonar. Entrenamos con una sola cohorte. El contrato de notas lo cumplimos de un solo lado: falta que lo firme Alumnos. Y SQLite es un único almacén: el mayor radio de impacto. Se puede reconstruir entero desde la zona cruda, pero falta un respaldo probado. Todo eso está priorizado en el backlog.»
+**6:45–7:45 · Gabi · Futuros pasos.** «El modelo es modesto: encuentra el 21 % de los abandonos. Sirve para ordenar llamados, no para afirmar que alguien va a abandonar. Lo primero es confirmar con Biblioteca lo de julio, y después reentrenar con otra cohorte y sumar más casos para entrenar, incluso de otras universidades. Los 42 alumnos aprobados y ausentes a la vez los revisamos con el Departamento de Alumnos. Y SQLite es un único almacén: el mayor radio de impacto. Se puede reconstruir entero desde la zona cruda, pero falta un respaldo diario probado. Todo eso está priorizado en el backlog.»
 
 ## Preguntas probables
 
@@ -108,28 +108,27 @@ Las tres primeras las anticipa la consigna; las demás son las que más probable
 
 | Pregunta | Responde | Respuesta |
 | --- | --- | --- |
-| ¿Qué cambiaría si la latencia requerida bajara diez veces? | Operación | Hoy el dato más fresco tiene un día; diez veces menos son unas dos horas y media. Alcanza con correr el DAG cada dos horas: todo es idempotente y la huella omite lo que no cambió. Lo que no aguanta es el modelo: sus variables son por cuatrimestre, y alertas en horas pedirían señales diarias, o sea otro modelo. |
-| ¿Qué componente concentra el mayor radio de impacto? | Arquitectura | El almacén (`dwh.db`): curada, consumo, variables, control y modelos viven ahí. Se puede reconstruir entero desde la zona cruda, que es inmutable y tiene huellas; el notebook lo hace en cada corrida. Falta un respaldo diario probado (backlog). |
-| ¿Qué control podría dar falsos positivos? | Gobierno | Tres: el PSI de julio (puede ser el receso), el amarillo de becas (pueden ser ingresantes) y la regla R4 (el error puede estar en el acta). Ninguno bloquea la publicación: avisan y decide una persona. |
+| ¿Qué cambiaría si la latencia requerida bajara diez veces? | JJ | Hoy el dato más fresco tiene un día; diez veces menos son unas dos horas y media. Alcanza con correr el DAG cada dos horas: todo es idempotente y la huella omite lo que no cambió. Lo que no aguanta es el modelo: sus variables son por cuatrimestre, y alertas en horas pedirían señales diarias, o sea otro modelo. |
+| ¿Qué componente concentra el mayor radio de impacto? | Gabi | El almacén (`dwh.db`): curada, consumo, variables, control y modelos viven ahí. Se puede reconstruir entero desde la zona cruda, que es inmutable y tiene huellas; el notebook lo hace en cada corrida. Falta un respaldo diario probado (backlog). |
+| ¿Qué control podría dar falsos positivos? | Ale | Tres: el PSI de julio (puede ser el receso), el amarillo de becas (pueden ser ingresantes) y la regla R4 (el error puede estar en el acta). Ninguno bloquea la publicación: avisan y decide una persona. |
 | ¿Por qué no usaron las materias abandonadas si es información del pasado? | Mati | Porque en estos datos es la etiqueta escrita de otra forma: aparece en el 100 % de los casos en quienes abandonan, y 209 de 247 ya habían abandonado materias antes del corte. El modelo «acertaría» con gente que ya se fue. Esos alumnos no se predicen: se listan como un hecho (backlog). |
 | El modelo da 0,70 de AUC. ¿No es muy bajo? | Mati | Sí, es modesto, y lo decimos en la ficha. La pregunta es si le gana a lo que ya había: le gana a la regla en las cinco repeticiones y encuentra un 23 % más de abandonos. Un modelo con 0,95 sería sospechoso de fuga, y lo medimos. |
 | ¿Por qué árboles y no la regresión logística, que es más explicable? | Mati | Probamos las dos. La logística no cumplió los criterios: casi empataba con la regla y en Diseño encontraba a 2 de 22. Para explicar los árboles, la ficha muestra la importancia de cada variable. |
 | ¿Cómo saben que la marcha atrás no fue un falso positivo? | Mati | No lo sabemos todavía: falta que Biblioteca diga si fue el receso. Por eso la marcha atrás es a la regla, que es segura, y no a «sin lista». Es la primera tarea del backlog. |
-| ¿Qué pasa si un DNI está mal cargado? | Arquitectura | Si el mismo DNI viene con otro nombre o fecha de nacimiento, no se fusiona: va a cuarentena (S11). Unir a dos personas distintas es peor que dejar un duplicado. |
-| ¿Qué hicieron con los 14 pares con distinto estado final? | Arquitectura | Vale el del legajo vigente, el que tiene cursadas (S10). Está en las decisiones del diagnóstico y en la carga del módulo 3. |
-| ¿Por qué el acta prevalece sobre el CSV? | Operación | Es el documento del docente (S2). Coinciden en el 97 %; el resto son 45 ausentes donde el CSV traería una nota. La diferencia queda registrada. |
-| ¿Cómo reprocesan un día cualquiera? | Operación | Se corre el DAG con esa fecha. Cada paso es idempotente: la huella omite los archivos iguales, las cargas son *upsert* y el hecho se republica por cuatrimestre. Lo probamos: el reproceso forzado no duplica ninguna fila. |
-| ¿Por qué cuarentena y no descartar las filas malas? | Operación | Porque descartar es perder el dato sin que nadie se entere. En cuarentena queda con su motivo, y alguien decide si se corrige y se reprocesa. |
-| ¿Cómo cumplen la Ley 25.326? | Gobierno | Datos personales aparte y seudonimizados, acceso por rol según el nivel, Tutorías solo ve a su lista y cada acceso se audita. La ficha del modelo dice para qué no se usa: becas, sanciones ni admisión. |
-| ¿Por qué SQLite y no Oracle? | Arquitectura | El entorno del trabajo es SQLite. Las decisiones no dependen del motor: dejamos el equivalente en Oracle de la carga (`MERGE`), de la seguridad (`DBMS_REDACT`, VPD) y de la auditoría. Pasar a un motor con roles reales está en el backlog. |
-| ¿Por qué no NiFi? | Operación | No había entorno. La consigna permite diagrama y script equivalente: dejamos una tabla con cada procesador de NiFi y la parte del script que hace lo mismo. |
-| ¿Cuánto cuesta esto? | Arquitectura | Casi nada en infraestructura: 2,5 MB y unos minutos por corrida. El costo real es humano: alguien tiene que atender las alertas. Por eso hay pocas reglas, con umbral razonable y un dueño cada una. |
+| ¿Qué pasa si un DNI está mal cargado? | JJ | Si el mismo DNI viene con otro nombre o fecha de nacimiento, no se fusiona: va a cuarentena (S11). Unir a dos personas distintas es peor que dejar un duplicado. |
+| ¿Qué hicieron con los 14 pares con distinto estado final? | Gabi | Vale el del legajo vigente, el que tiene cursadas (S10). Está en las decisiones del diagnóstico y en la carga del módulo 3. |
+| ¿Por qué el acta prevalece sobre el CSV? | JJ | Es el documento del docente (S2). Coinciden en el 97 %; el resto son 45 ausentes donde el CSV traería una nota. La diferencia queda registrada. |
+| ¿Cómo reprocesan un día cualquiera? | JJ | Se corre el DAG con esa fecha. Cada paso es idempotente: la huella omite los archivos iguales, las cargas son *upsert* y el hecho se republica por cuatrimestre. Lo probamos: el reproceso forzado no duplica ninguna fila. |
+| ¿Por qué cuarentena y no descartar las filas malas? | JJ | Porque descartar es perder el dato sin que nadie se entere. En cuarentena queda con su motivo, y alguien decide si se corrige y se reprocesa. |
+| ¿Cómo cumplen la Ley 25.326? | Ale | Datos personales aparte y seudonimizados, acceso por rol según el nivel, Tutorías solo ve a su lista y cada acceso se audita. La ficha del modelo dice para qué no se usa: becas, sanciones ni admisión. |
+| ¿Por qué SQLite y no Oracle? | Gabi | El entorno del trabajo es SQLite. Las decisiones no dependen del motor: dejamos el equivalente en Oracle de la carga (`MERGE`), de la seguridad (`DBMS_REDACT`, VPD) y de la auditoría. Pasar a un motor con roles reales está en el backlog. |
+| ¿Cómo ingieren y orquestan? | JJ | NiFi lleva los archivos de cada origen a la zona cruda, sin repetir los ya ingeridos (huella). Airflow orquesta curada, variables y consumo. En el notebook dejamos el flujo de NiFi diagramado y un script equivalente que hace lo mismo. |
+| ¿Cuánto cuesta esto? | Gabi | Casi nada en infraestructura: 2,5 MB y unos minutos por corrida. El costo real es humano: alguien tiene que atender las alertas. Por eso hay pocas reglas, con umbral razonable y un dueño cada una. |
 
 ## Cómo ensayar
 
 Con dos ensayos cronometrados alcanza. En el segundo, alguien que no presenta hace de profe con las preguntas de arriba.
 
-- [ ] Completar los nombres de los integrantes en la tabla de reparto y en la diapositiva 1
 - [ ] Cada uno lee su bloque en voz alta y lo cronometra: si se pasa, recorta un ejemplo, nunca la decisión ni la alternativa descartada
 - [ ] Ensayo completo 1: los 8 minutos de corrido, sin cortar
 - [ ] Ensayo completo 2, con preguntas: cada uno responde las de su rol en menos de 30 segundos
