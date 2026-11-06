@@ -1,0 +1,75 @@
+{
+  "nombre": "vidriera-fraude-precontracargo",
+  "version": "1.1.0",
+  "creado": "2025-10-15",
+  "algoritmo": "xgboost (parsimonioso, peso 10, prof. 3)",
+  "hiperparametros": {
+    "colsample_bytree": 0.8,
+    "learning_rate": 0.05,
+    "max_depth": 3,
+    "min_child_weight": 5,
+    "n_estimators": 300,
+    "reg_lambda": 5,
+    "scale_pos_weight": 10,
+    "subsample": 0.8
+  },
+  "datos": {
+    "entrenamiento": [
+      "2025-01-01",
+      "2025-07-13"
+    ],
+    "calibracion": [
+      "2025-07-14",
+      "2025-08-13"
+    ],
+    "pedidos": 93385,
+    "fraudes": 630,
+    "huella_sha256": "70f6244bc7b2da17",
+    "maduracion_dias": 62
+  },
+  "variables": [
+    "log_importe",
+    "cantidad_items",
+    "cuotas",
+    "madrugada",
+    "envio_exterior",
+    "antig_cuenta_dias",
+    "disp_faltante",
+    "disp_antig_dias",
+    "disp_pedidos_previos",
+    "email_generico",
+    "email_ya_usado",
+    "cli_pedidos_previos",
+    "min_desde_anterior",
+    "cli_pedidos_1h",
+    "cli_pedidos_24h",
+    "metodo_pago"
+  ],
+  "umbrales": {
+    "revision": 0.00942865801942623,
+    "bloqueo": 0.4159629567492517,
+    "desborde": 0.09652135576627657,
+    "capacidad_diaria": 40
+  },
+  "costos_supuestos": {
+    "comision_contracargo": 3000,
+    "margen": 0.3,
+    "abandono_si_se_frena": 0.4,
+    "efectividad_revision": 0.85
+  },
+  "metricas_version_1_0_0_en_prueba": {
+    "modelo": "xgboost (parsimonioso, peso 10, prof. 3)",
+    "PR-AUC": 0.1543,
+    "ROC-AUC": 0.9328,
+    "recall en cola 40": 0.8676,
+    "precisión en cola 40": 0.067,
+    "monto capturado": 0.8414,
+    "buenos revisados por día": 37.3182
+  },
+  "librerias": {
+    "python-sklearn": "1.9.1",
+    "xgboost": "3.4.1",
+    "pandas": "3.0.5"
+  },
+  "responsable": "Equipo 7 · Ciencia de datos (dueño del modelo) · Prevención de fraude (dueño de la decisión)"
+}

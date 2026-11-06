@@ -1,0 +1,3 @@
+# Lo regenera el notebook al correrlo; la misma tabla está dentro de superset/07_Vidriera.db
+superset/pedidos_puntuados.csv
+.ipynb_checkpoints/

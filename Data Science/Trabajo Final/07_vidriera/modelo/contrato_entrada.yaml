@@ -1,0 +1,108 @@
+version_contrato: '1.0'
+modelo: vidriera-fraude-precontracargo 1.1.0
+campos_extra: rechazar
+campos:
+  id_pedido:
+    tipo: entero
+    requerido: true
+    min: 1
+  importe:
+    tipo: decimal
+    requerido: true
+    min: 1
+    max: 5000000
+    unidad: pesos, con punto decimal
+  cantidad_items:
+    tipo: entero
+    requerido: true
+    min: 1
+    max: 50
+  cuotas:
+    tipo: entero
+    requerido: true
+    valores:
+    - 1
+    - 3
+    - 6
+    - 12
+  metodo_pago:
+    tipo: texto
+    requerido: true
+    valores:
+    - billetera
+    - credito
+    - debito
+  hora:
+    tipo: entero
+    requerido: true
+    min: 0
+    max: 23
+    unidad: hora local de Argentina
+  envio_exterior:
+    tipo: entero
+    requerido: true
+    valores:
+    - 0
+    - 1
+  antig_cuenta_dias:
+    tipo: decimal
+    requerido: true
+    min: 0
+    max: 36500
+  disp_faltante:
+    tipo: entero
+    requerido: true
+    valores:
+    - 0
+    - 1
+  disp_antig_dias:
+    tipo: decimal
+    requerido: false
+    min: 0
+    max: 36500
+    nulo_si: disp_faltante = 1
+  disp_pedidos_previos:
+    tipo: decimal
+    requerido: false
+    min: 0
+    max: 100000
+    nulo_si: disp_faltante = 1
+  email_generico:
+    tipo: entero
+    requerido: true
+    valores:
+    - 0
+    - 1
+  email_ya_usado:
+    tipo: entero
+    requerido: true
+    valores:
+    - 0
+    - 1
+  cli_pedidos_previos:
+    tipo: entero
+    requerido: true
+    min: 0
+    max: 100000
+  min_desde_anterior:
+    tipo: decimal
+    requerido: true
+    min: 0
+    max: 100000
+    nota: 100000 si es su primer pedido
+  cli_pedidos_1h:
+    tipo: entero
+    requerido: true
+    min: 0
+    max: 500
+  cli_pedidos_24h:
+    tipo: entero
+    requerido: true
+    min: 0
+    max: 5000
+respuesta:
+  '200': id_pedido, probabilidad, decision (aprobar | revisar | bloquear), motivos,
+    version, ms
+  '422': lista de errores de validación; el pedido va a revisión manual por defecto
+    (falla segura)
+tiempo_de_respuesta: p95 < 50 ms por pedido
