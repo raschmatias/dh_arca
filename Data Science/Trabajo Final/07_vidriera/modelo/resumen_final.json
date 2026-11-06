@@ -1,0 +1,17 @@
+{
+  "pedidos analizados (aprobados, únicos)": "131,389",
+  "con etiqueta madura": "108,231 (hasta el 13/08/2025)",
+  "tasa de fraude observada": "0.67% [IC 95 % 0.62% ; 0.72%]",
+  "fraudes por día / pedidos por día": "3.2 / 481",
+  "modelo": "xgboost (parsimonioso, peso 10, prof. 3), calibrado (Platt)",
+  "prueba (1/7–13/8): PR-AUC modelo / regla": "0.154 [0.127 ; 0.196] / 0.129 [0.101 ; 0.166]",
+  "prueba: recall en cola 40 modelo / regla": "86.8% [81% ; 91%] / 86.8% [81% ; 91%]",
+  "diferencia modelo − regla en recall": "+0.0% [-3.4% ; +3.8%]",
+  "política propuesta: fraudes capturados": "86.0% (hoy, supuesto: 10.3%)",
+  "política propuesta: monto capturado": "83.2% (hoy: 34.5%)",
+  "política propuesta: revisados / bloqueados por día": "38.5 / 0.07",
+  "clientes buenos frenados por día": "35.9",
+  "costo por día: propuesta / hoy": "$32,821 / $82,650  (ahorro ≈ $1,494,856 por mes)",
+  "umbrales (v1.1.0)": "revisión p ≥ 0.94% · bloqueo p ≥ 41.6% · desborde p ≥ 9.7%",
+  "tiempo de respuesta": "p50 4.7 ms · p95 9.5 ms"
+}

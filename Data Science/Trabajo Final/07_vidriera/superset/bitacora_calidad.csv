@@ -1,0 +1,13 @@
+problema,dónde,filas afectadas,qué decidimos y por qué
+Pedidos duplicados por reintento (idénticos salvo el id_pedido),pedidos,3570,Se conserva el id más bajo (el original). Las copias nunca tienen contracargo: dejarlas inflaría los casos buenos. Quedan guardadas en `reintentos` para auditoría.
+Filas de pago de los pedidos duplicados,pagos_contracargos,3570,Se descartan junto con su pedido: todas dicen 'aprobado' sin contracargo.
+Fechas mezcladas: UTC con 'Z' y hora local sin zona,pedidos.fecha_hora,57050,"Se convierten las UTC a America/Argentina/Buenos_Aires (UTC−3). Sin esto, la hora del pedido queda corrida 3 horas en el 40 % de los casos."
+"Importes en cuatro formatos (coma o punto decimal, miles con punto, $ redondeado)",pedidos.importe,142810,Se convierten a número con una regla explícita; se verificó antes que no haya textos ambiguos como '1.234'.
+Importes con $ vienen redondeados al peso,pedidos.importe,28293,Se conservan: la pérdida es de centavos y no cambia el riesgo. Queda la marca por si se necesita conciliar.
+"País de envío escrito de cuatro formas (AR, Argentina, ARG, 'argentina ')",pedidos.pais_envio,34374,"Se unifican al código ISO de dos letras. Sin esto, 'Argentina' parecería un país extranjero."
+Correos en mayúsculas o con espacios al final,pedidos.email,17843,"Se pasan a minúsculas y sin espacios. Si no, el mismo correo cuenta como dos y la variable 'correo ya usado por el cliente' se rompe."
+Provincias en mayúsculas,clientes.provincia,2947,Se normalizan a 'Título' (BUENOS AIRES → Buenos Aires).
+Fecha de alta en dos formatos (dd/mm/aaaa y aaaa-mm-dd),clientes.fecha_alta,24859,"Se interpreta cada formato por separado, sin dejar que pandas adivine (01/02 podría leerse como 2 de enero)."
+Pedidos sin dispositivo,pedidos.id_dispositivo,4151,No se borran ni se imputan: se agrega la marca 'disp_faltante'. La falta de dato puede ser informativa (en la sección 3 se ve que no lo es).
+Pedidos sin registro de pago,pagos_contracargos,93,"Todos son de agosto y septiembre, fuera de la ventana madura: no se usan para entrenar ni evaluar. Se puntúan igual (el modelo no necesita el pago)."
+Cobros rechazados,pagos_contracargos.estado_pago,11328,"Quedan fuera de la población (no se despachan), pero sí cuentan como intentos en las variables de velocidad del cliente."

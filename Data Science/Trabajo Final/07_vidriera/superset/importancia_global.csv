@@ -1,0 +1,17 @@
+variable,importancia
+pedidos del cliente en la última hora,0.694113
+pedidos del cliente en las últimas 24 h,0.06587311
+minutos desde su pedido anterior,0.04138038
+medio de pago,0.032436524
+correo con usuario genérico,0.026964666
+antigüedad de la cuenta,0.021830257
+envío al exterior,0.017817004
+importe,0.01501729
+pedidos previos desde el dispositivo,0.013906309
+correo ya usado por el cliente,0.011663139
+antigüedad del dispositivo,0.0111332275
+cuotas,0.011110525
+compra de madrugada,0.010584649
+cantidad de ítems,0.009903162
+pedidos previos del cliente,0.009229499
+sin dato de dispositivo,0.0070373006
