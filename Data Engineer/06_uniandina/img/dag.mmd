@@ -1,29 +1,53 @@
 flowchart LR
-  G{"¿Toca hoy?<br/>diario en cierre de actas<br/>lunes el resto del año"} --> EB["extraer_base<br/>foto de la base académica"]
-  EB --> DA["dim_alumno<br/>SCD 2 al día"]
-  EB --> MA["materias"]
-  DA --> CU["cursadas"]
+  NF(["Apache NiFi<br/>corre aparte<br/>orígenes → zona cruda"]) -.->|"registro en control_lote"| S
+
+  G{"toca_hoy<br/>diario en cierre de actas<br/>lunes el resto del año"} --> S["esperar_cruda<br/>sensor: NiFi dejó<br/>todos los orígenes"]
+
+  subgraph CU_Z["Zona curada · cruda → contrato → curada"]
+    DA["dim_alumno<br/>SCD 2 al día"]
+    MA["materias"]
+    CU["cursadas"]
+    BI["biblioteca"]
+    BE["becas"]
+    EN["encuesta"]
+    N1["notas_2024-2c"]
+    N2["notas_2025-1c"]
+    NX["notas_…<br/>una tarea por archivo<br/>en la zona cruda"]
+    AC["actas<br/>en orden de llegada<br/>prevalecen sobre los CSV"]
+  end
+
+  S --> DA
+  S --> MA
+  DA --> CU
   MA --> CU
-  DA --> BI["biblioteca"]
-  DA --> BE["becas"]
-  MA --> EN["encuesta"]
-  CU --> N1["notas_2024-2c"]
-  CU --> N2["notas_2025-1c"]
-  CU --> NX["notas_… <br/>una tarea por archivo"]
-  N1 --> AC["actas<br/>prevalece sobre los CSV"]
+  DA --> BI
+  DA --> BE
+  MA --> EN
+  CU --> N1
+  CU --> N2
+  CU --> NX
+  N1 --> AC
   N2 --> AC
   NX --> AC
-  CU --> PC["publicar_consumo<br/>por cuatrimestre<br/>regla de tardíos"]
+
+  VA["variables<br/>en fechas de corte<br/>1/3 y 1/8 · módulo 7"]
+  PC["publicar_consumo<br/>por cuatrimestre<br/>regla de tardíos"]
+
+  AC --> VA
+  BI --> VA
+  BE --> VA
+  CU --> PC
   AC --> PC
   PC --> AV["aviso<br/>a la responsable"]
-  BI --> AV
-  BE --> AV
+  VA --> AV
   EN --> AV
   X(["on_failure_callback<br/>aviso de falla"]) -.- AV
 
   classDef ing fill:#eef2f7,stroke:#5b6b80
   classDef pub fill:#e8f4ea,stroke:#3c7a4a
   classDef ctl fill:#fff4e0,stroke:#b07a1a
-  class EB,DA,MA,CU,BI,BE,EN,N1,N2,NX,AC ing
-  class PC pub
-  class G,AV,X ctl
+  classDef nifi fill:#1f2a44,stroke:#1f2a44,color:#ffffff
+  class DA,MA,CU,BI,BE,EN,N1,N2,NX,AC ing
+  class VA,PC pub
+  class G,S,AV,X ctl
+  class NF nifi

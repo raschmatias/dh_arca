@@ -1,26 +1,32 @@
 flowchart TB
-  subgraph G1["Grupo de procesos: archivos externos (uno por origen)"]
-    L["ListFile<br/>carpeta de entrada<br/>cada 10 min"] -->|success| F["FetchFile"]
-    F -->|success| H["CryptographicHashContent<br/>SHA-256 = huella"]
-    H -->|success| D["DetectDuplicate<br/>¿huella ya ingerida?"]
-    D -->|non-duplicate| R["PutFile<br/>zona cruda<br/>/origen/llegada=fecha/"]
-    D -->|duplicate| X1["LogMessage<br/>omitido"]
-    R -->|success| XL["ConvertExcelToCSV<br/>solo XLSX: una salida por hoja"]
-    XL -->|success| V["ValidateRecord<br/>contrato del origen<br/>Schema Registry"]
-    V -->|valid| U["UpdateRecord<br/>normalizar: escala, coma decimal,<br/>legajo, DNI, materia"]
-    U -->|success| LK["LookupRecord<br/>legajo / DNI → persona<br/>materia → id"]
-    LK -->|matched| P["PutDatabaseRecord<br/>zona curada<br/>upsert por clave natural"]
+  subgraph G1["Archivos externos · notas, actas, becas, encuesta"]
+    L["ListFile<br/>datos_externos + buzón<br/>cada 10 min"] -->|success| F["FetchFile"]
   end
 
   subgraph G2["Base académica"]
-    Q["QueryDatabaseTableRecord<br/>alumnos · materias · cursadas<br/>cambios_plan"] -->|success| R
+    Q["QueryDatabaseTableRecord<br/>foto diaria a las 5:00<br/>alumnos · materias · cursadas · cambios_plan"]
   end
 
-  V -->|invalid| CQ["UpdateAttribute<br/>motivo = regla que no pasó"]
-  LK -->|unmatched| CQ
-  XL -->|failure| CQ
-  P -->|failure| CQ
-  CQ --> CP[["PutDatabaseRecord<br/>cuarentena"]]
+  subgraph G3["Biblioteca"]
+    LB["ListFile<br/>eventos JSONL"] -->|success| FB["FetchFile"]
+  end
+
+  F -->|success| UA
+  Q -->|success| UA
+  FB -->|success| UA
+
+  subgraph C["Lo mismo para todos los orígenes"]
+    UA["UpdateAttribute<br/>origen · llegada = fecha"] --> H["CryptographicHashContent<br/>SHA-256 = huella"]
+    H -->|success| D["DetectDuplicate<br/>¿huella ya está en la zona cruda?"]
+    D -->|non-duplicate| P["PutFile<br/>zona cruda<br/>/origen/llegada=fecha/<br/>nunca sobrescribe"]
+    D -->|duplicate| X1["LogMessage<br/>omitido"]
+    P -->|success| R["PutDatabaseRecord<br/>registro del archivo<br/>control_lote · proceso nifi<br/>fuente · huella · ruta"]
+  end
+
+  P -->|failure| RT["RetryFlowFile<br/>3 intentos"]
+  RT -->|retries_exceeded| AL
+
+  R -.->|"lo lee el sensor del DAG"| AF(["Airflow · esperar_cruda<br/>de acá en adelante:<br/>contrato · curada · variables · consumo"])
 
   subgraph M["Monitoreo"]
     MA["MonitorActivity<br/>sin archivos en 24 h<br/>durante el cierre de actas"]
@@ -29,11 +35,12 @@ flowchart TB
     MA --> AL
     BR --> AL
   end
-  CP -.->|"% de cuarentena > umbral"| AL
 
   classDef proc fill:#eef2f7,stroke:#5b6b80
   classDef err fill:#fde8e8,stroke:#b03a3a
   classDef mon fill:#fff4e0,stroke:#b07a1a
-  class L,F,H,D,R,XL,V,U,LK,P,Q proc
-  class CQ,CP,X1 err
+  classDef air fill:#e8f4ea,stroke:#3c7a4a
+  class L,F,Q,LB,FB,UA,H,D,P,R proc
+  class X1,RT err
   class MA,BR,AL mon
+  class AF air
